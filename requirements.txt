@@ -1,0 +1,9 @@
+chardet~=5.1.0
+environs~=9.5.0
+numpy~=1.23.5
+vosk~=0.3.45
+torch~=1.13.1
+transformers~=4.25.1
+srt~=3.5.2
+torch~=1.13.1
+
