@@ -3,7 +3,7 @@
 The utility can be useful for people learning a foreign language by watching movies with subtitles.
   If you have a movie in the language you need, then subtitles can be downloaded from the Internet, but
 most often these subtitles will be out of sync with the audio.
-This utility will help solve this problem. The opesource library is used for recognition
+This utility will help solve this problem. The opensource library is used for recognition
   [Vosk](https://alphacephei.com/vosk/) supporting more than 20 languages and working offline
 
 ## Run
