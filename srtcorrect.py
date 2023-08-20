@@ -10,7 +10,7 @@ from functools import reduce
 from random import uniform
 
 import chardet
-import numpy as np
+#import numpy as np
 import requests
 import srt
 from environs import Env
@@ -145,6 +145,10 @@ def get_subtitles(filename):
         subtitles.pop(-1)
     if 'www.' in subtitles[-1].content:
         subtitles.pop(-1)
+    #enumerate for right index (if wrong source file)
+    for i,s in  enumerate(subtitles):
+        s.index=i+1
+
     return [{'index': s.index,
              'start': s.start.total_seconds(),
              'end': s.end.total_seconds(),
@@ -273,7 +277,7 @@ def mkdict_recs(subs, recs):
 
 
 def calc_timeframe(subs, recs):
-    return abs(subs[-1].end - recs[-1].end) + 20
+    return abs(subs[-1].end - recs[-1].end) + 30
 
 
 def find_longest_chain(subs, recs, seek):
@@ -299,6 +303,18 @@ def find_longest_chain(subs, recs, seek):
                         {'indsub': i, 'indrec': n, 'length': y, 'chain': [subs[i + z].word for z in range(y)]})
     return longest_chain
 
+def interp(x,x_values,y_values):
+    """linear interpolation istead call from numpy"""
+    if x <= x_values[0]:
+        return y_values[0]
+    if x >= x_values[-1]:
+        return y_values[-1]
+    i = 0
+    while x_values[i] < x:
+        i += 1
+    tilt = (y_values[i] - y_values[i - 1]) / (x_values[i] - x_values[i - 1])
+    y = y_values[i - 1] + tilt * (x - x_values[i - 1])
+    return y
 
 def correct_srt(video_filename, model_name, metadata, audio_stream_num=None):
     subtitle_filename = os.path.abspath(os.path.splitext(video_filename)[0] + '.srt')
@@ -349,7 +365,8 @@ def correct_srt(video_filename, model_name, metadata, audio_stream_num=None):
     f = list(zip(*[(s['start'], s['correct']) for s in subt if s['correct'] != None]))
     for s in subt:
         if s['correct'] == None:
-            s['correct'] = np.interp(s['start'], np.array(f[0]), np.array(f[1]))
+            s['correct'] = interp(s['start'], f[0],f[1])
+            # s['correct'] = np.interp(s['start'], np.array(f[0]), np.array(f[1]))
     put_subtitles(subtitle_filename, subt)
     return True
 
@@ -366,7 +383,7 @@ def main():
     movie = os.path.abspath(' '.join(args.movie))
     subtitle_filename = os.path.splitext(movie)[0] + '.srt'
     if not model_name:
-        print('neural network not found or nor specifed')
+        print('neural network not found or not specifed')
         sys.exit(1)
     if not os.path.exists(movie) or not os.path.isfile(movie):
         print(f'not found video file: {movie}')
